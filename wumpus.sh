@@ -5,6 +5,7 @@
 # Also, why not?
 
 PLAYER=0
+ADJACENT=''
 PREVIOUS=1
 WUMPUS=$(seq 1 19 | shuf -n 1)
 BATS=$(seq 1 19 | shuf -n 1)
@@ -14,8 +15,7 @@ ARROWS_REMAINING=3
 GAMEOVER=0
 
 is_adjacent () {
-    local ADJ=$(get_adjacent $1)
-    return $(echo "$ADJ" | grep -q -w $2)
+    return $(echo "$ADJACENT" | grep -q -w $2)
 }
 
 get_adjacent () {
@@ -41,11 +41,14 @@ move () {
     then
         PREVIOUS=$PLAYER
         PLAYER=$1
-        if check_wumpus $PLAYER $WUMPUS
-        then
-            echo "You have been eaten by a wumpus!"
-            exit 0
-        fi
+
+        # check wumpus
+        if [ $PLAYER -eq $WUMPUS ]; then echo "You've been eaten by a wumpus!"; exit 0; fi
+        # check pit
+        if [ $PLAYER -eq $PIT ]; then echo "You fell down a pit! You died!"; exit 0; fi
+        # check bats
+        if [ $PLAYER -eq $BATS ]; then PLAYER=$(seq 0 19 | shuf -n 1); echo "Bats carried you away!"; fi
+
     fi
 }
 
@@ -113,7 +116,8 @@ echo "You have 3 arrows."
 
 while [ $GAMEOVER -eq 0 ]
 do
-    get_adjacent $PLAYER
+    ADJACENT=$(get_adjacent $PLAYER)
+    echo "Valid moves: $ADJACENT"
     if is_adjacent $PLAYER $WUMPUS
     then
         echo "You smell something awful."
@@ -130,6 +134,8 @@ do
     read COMMAND
     #echo "You entered: $COMMAND"
     process_command $COMMAND
+
+
 done
 
 exit 0
