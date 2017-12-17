@@ -4,6 +4,8 @@
 # I felt bad that my Javascript version uses a grid.
 # Also, why not?
 
+source includes.sh
+
 PLAYER=0
 ADJACENT=''
 PREVIOUS=1
@@ -15,7 +17,7 @@ ARROWS_REMAINING=3
 GAMEOVER=0
 
 is_debug_mode () {
-    return 0
+    return 1
 }
 
 is_adjacent () {
@@ -35,10 +37,11 @@ disturb_wumpus () {
 
 # takes 1 argument, the destination
 move () {
-    if is_adjacent $1
+    local MOVE=$(translate_human_to_computer $1)
+    if is_adjacent $MOVE
     then
         PREVIOUS=$PLAYER
-        PLAYER=$1
+        PLAYER=$MOVE
 
         # check wumpus
         if [ $PLAYER -eq $WUMPUS ]; then echo "You've been eaten by a wumpus!"; GAMEOVER=1; fi
@@ -63,11 +66,12 @@ move () {
 
 # takes 1 argument, the target
 shoot () {
+    local TARGET=$(translate_human_to_computer $1)
     if [ $ARROWS_REMAINING -gt 0 ]
     then
-        if is_adjacent $1
+        if is_adjacent $TARGET
         then
-            if [ $1 -eq $WUMPUS ]
+            if [ $TARGET -eq $WUMPUS ]
             then
                 echo "You killed the wumpus! You WIN!"
                 exit 0
@@ -86,34 +90,19 @@ shoot () {
     fi
 }
 
-next_step () {
-    echo next step    
-}
-
 process_command () {
     if [[ $1 =~ ^[0-9]+ ]]
     then
         move $1
     elif [[ $1 =~ ^[Mm] ]]
     then
-        move $*
+        move $2
     elif [[ $1 =~ ^[Ss] ]]
     then
         shoot $2
-    elif [[ $1 =~ ^[Bb] ]]
-    then
-        move $1
-    elif [[ $1 =~ ^[Ff] ]]
-    then
-        move $1
-    elif [[ $1 =~ ^[Ll] ]]
-    then
-        move $1
-    elif [[ $1 =~ ^[Rr] ]]
-    then
-        move $1
     elif [[ $1 =~ ^[EeQq] ]]
     then
+        echo "You retire to a comfortable life of not hunting wumpuses."
         GAMEOVER=1
     else
         print_help
@@ -122,9 +111,9 @@ process_command () {
 
 print_help () {
     echo "Commands are:"
-    echo "- (M|MOVE) (LEFT|RIGHT|BACK)"
-    echo "- (S|SHOOT) (LEFT|RIGHT|BACK)"
-    echo "- (Q|QUIT)"
+    echo "- (m|move) #"
+    echo "- s|shoot #"
+    echo "- q|quit"
 }
 
 echo "###################"
@@ -133,17 +122,25 @@ echo "# HUNT THE WUMPUS #"
 echo "#                 #"
 echo "###################"
 echo
-echo "You are in a dark cavern."
+echo "You are in a series of dark caverns."
 echo "Like, really dark."
 echo "You can barely see."
+echo "But they are ADA compliant."
+echo "They are numbered in Braille."
+echo "Which, somehow, you can read. Cool!"
+echo
+echo "You are here to hunt the terrifying wumpus."
+echo "You'll know when he's near. You can smell him."
+echo "Look out for the bottomless pit. And the bats!"
 echo "You have 3 arrows."
-
 
 while [ $GAMEOVER -eq 0 ]
 do
+    echo
+    echo "You are in cavern #$(translate_computer_to_human $PLAYER)"
     if is_debug_mode; then echo "W: $WUMPUS, P: $PIT, B: $BATS, A: $ARROW"; fi
     ADJACENT=$(get_adjacent $PLAYER)
-    echo "Possible moves: $ADJACENT"
+    
     if is_adjacent $WUMPUS
     then
         echo "You smell something awful."
@@ -156,11 +153,14 @@ do
     then
         echo "You hear flapping."
     fi
+
+
+    display_moves $ADJACENT
+    echo
     echo "Enter a command:"
     read COMMAND
     #echo "You entered: $COMMAND"
     process_command $COMMAND
-
 
 done
 
