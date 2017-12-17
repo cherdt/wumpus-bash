@@ -102,6 +102,7 @@ process_command () {
         shoot $2
     elif [[ $1 =~ ^[EeQq] ]]
     then
+        echo
         echo "You retire to a comfortable life of not hunting wumpuses."
         GAMEOVER=1
     else
@@ -158,8 +159,7 @@ do
 
     display_moves $ADJACENT
     echo
-    echo "Enter a command:"
-    read COMMAND
+    read -p "Enter a command: " COMMAND
     #echo "You entered: $COMMAND"
     process_command $COMMAND
 
