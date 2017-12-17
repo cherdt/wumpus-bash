@@ -23,3 +23,10 @@ display_moves () {
     done
     echo "Possible moves: $(echo $MOVES | tr ' ' '\n' | sort -n | paste -d' ' -s)"
 }
+
+random_event () {
+    if [ $(seq 1 2 | shuf -n 1) -eq 1 ]
+    then
+        echo "$(shuf -n 1 random)"
+    fi
+}

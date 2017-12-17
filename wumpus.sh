@@ -130,7 +130,7 @@ echo "They are numbered in Braille."
 echo "Which, somehow, you can read. Cool!"
 echo
 echo "You are here to hunt the terrifying wumpus."
-echo "You'll know when he's near. You can smell him."
+echo "You'll know when he's near. You'll smell him."
 echo "Look out for the bottomless pit. And the bats!"
 echo "You have 3 arrows."
 
@@ -140,7 +140,8 @@ do
     echo "You are in cavern #$(translate_computer_to_human $PLAYER)"
     if is_debug_mode; then echo "W: $WUMPUS, P: $PIT, B: $BATS, A: $ARROW"; fi
     ADJACENT=$(get_adjacent $PLAYER)
-    
+
+    random_event    
     if is_adjacent $WUMPUS
     then
         echo "You smell something awful."
