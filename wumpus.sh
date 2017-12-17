@@ -15,7 +15,7 @@ ARROWS_REMAINING=3
 GAMEOVER=0
 
 is_adjacent () {
-    return $(echo "$ADJACENT" | grep -q -w $2)
+    return $(echo "$ADJACENT" | grep -q -w $1)
 }
 
 get_adjacent () {
@@ -33,11 +33,9 @@ check_wumpus () {
     return 1
 }
 
+# takes 1 argument, the destination
 move () {
-    echo "move: $1"
-    shift
-    echo "move: $1"
-    if [[ $1 =~ ^[0-9]+ ]]
+    if is_adjacent $1
     then
         PREVIOUS=$PLAYER
         PLAYER=$1
@@ -48,16 +46,27 @@ move () {
         if [ $PLAYER -eq $PIT ]; then echo "You fell down a pit! You died!"; exit 0; fi
         # check bats
         if [ $PLAYER -eq $BATS ]; then PLAYER=$(seq 0 19 | shuf -n 1); echo "Bats carried you away!"; fi
-
+    else
+        echo "Invalid move: $1"
     fi
 }
 
+# takes 1 argument, the target
 shoot () {
-    echo "shoot: $1"
     if [ $ARROWS_REMAINING -gt 0 ]
     then
-        echo "fired arrow!"
-        let "ARROWS_REMAINING = ARROWS_REMAINING - 1" 
+        if is_adjacent $1
+        then
+            if [ $1 -eq $WUMPUS ]
+            then
+                echo "You killed the wumpus! You WIN!"
+                exit 0
+            fi
+            echo "Drats! Missed!"
+            let "ARROWS_REMAINING = ARROWS_REMAINING - 1"
+        else
+            echo "Think you can shoot through rock walls?"
+        fi
     else
         echo "No arrows left."
     fi
@@ -68,13 +77,15 @@ next_step () {
 }
 
 process_command () {
-
-    if [[ $1 =~ ^[Mm] ]]
+    if [[ $1 =~ ^[0-9]+ ]]
+    then
+        move $1
+    elif [[ $1 =~ ^[Mm] ]]
     then
         move $*
     elif [[ $1 =~ ^[Ss] ]]
     then
-        shoot $1
+        shoot $2
     elif [[ $1 =~ ^[Bb] ]]
     then
         move $1
@@ -118,17 +129,23 @@ while [ $GAMEOVER -eq 0 ]
 do
     ADJACENT=$(get_adjacent $PLAYER)
     echo "Valid moves: $ADJACENT"
-    if is_adjacent $PLAYER $WUMPUS
+    if is_adjacent $WUMPUS
     then
         echo "You smell something awful."
     fi
-    if is_adjacent $PLAYER $PIT
+    if is_adjacent $PIT
     then
         echo "You feel a breeze."
     fi
-    if is_adjacent $PLAYER $BATS
+    if is_adjacent $BATS
     then
         echo "You hear flapping."
+    fi
+    if is_adjacent $ARROW
+    then
+        echo "You found an arrow!"
+        let "ARROW = 999"
+        let "ARROWS_REMAINING = ARROWS_REMAINING + 1"
     fi
     echo "Enter a command:"
     read COMMAND
