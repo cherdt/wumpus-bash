@@ -14,6 +14,10 @@ ARROW=$(seq 1 19 | shuf -n 1)
 ARROWS_REMAINING=3
 GAMEOVER=0
 
+is_debug_mode () {
+    return 0
+}
+
 is_adjacent () {
     return $(echo "$ADJACENT" | grep -q -w $1)
 }
@@ -25,6 +29,9 @@ get_adjacent () {
     echo $ADJ1 $ADJ2 $ADJ3 | tr ' ' '\n' | sort -n | paste -d' ' -s
 }
 
+disturb_wumpus () {
+    WUMPUS=$(echo $ADJACENT | cut -d' ' -f $(seq 1 3 | shuf -n 1))
+}
 
 # takes 1 argument, the destination
 move () {
@@ -34,11 +41,14 @@ move () {
         PLAYER=$1
 
         # check wumpus
-        if [ $PLAYER -eq $WUMPUS ]; then echo "You've been eaten by a wumpus!"; exit 0; fi
+        if [ $PLAYER -eq $WUMPUS ]; then echo "You've been eaten by a wumpus!"; GAMEOVER=1; fi
+
         # check pit
-        if [ $PLAYER -eq $PIT ]; then echo "You fell down a pit! You died!"; exit 0; fi
+        if [ $PLAYER -eq $PIT ]; then echo "You fell down a pit! You died!"; GAMEOVER=1; fi
+
         # check bats
         if [ $PLAYER -eq $BATS ]; then PLAYER=$(seq 0 19 | shuf -n 1); echo "Bats carried you away!"; fi
+
         # check arrow
         if [ $PLAYER -eq $ARROW ] 
         then
@@ -64,6 +74,10 @@ shoot () {
             fi
             echo "Drats! Missed!"
             let "ARROWS_REMAINING = ARROWS_REMAINING - 1"
+            if is_adjacent $WUMPUS
+            then
+                disturb_wumpus
+            fi
         else
             echo "Think you can shoot through rock walls?"
         fi
@@ -127,8 +141,9 @@ echo "You have 3 arrows."
 
 while [ $GAMEOVER -eq 0 ]
 do
+    if is_debug_mode; then echo "W: $WUMPUS, P: $PIT, B: $BATS, A: $ARROW"; fi
     ADJACENT=$(get_adjacent $PLAYER)
-    echo "Valid moves: $ADJACENT"
+    echo "Possible moves: $ADJACENT"
     if is_adjacent $WUMPUS
     then
         echo "You smell something awful."
