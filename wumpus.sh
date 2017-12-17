@@ -25,13 +25,6 @@ get_adjacent () {
     echo $ADJ1 $ADJ2 $ADJ3 | tr ' ' '\n' | sort -n | paste -d' ' -s
 }
 
-check_wumpus () {
-    if [ $1 -eq $2 ]
-    then
-        return 0
-    fi
-    return 1
-}
 
 # takes 1 argument, the destination
 move () {
@@ -46,6 +39,13 @@ move () {
         if [ $PLAYER -eq $PIT ]; then echo "You fell down a pit! You died!"; exit 0; fi
         # check bats
         if [ $PLAYER -eq $BATS ]; then PLAYER=$(seq 0 19 | shuf -n 1); echo "Bats carried you away!"; fi
+        # check arrow
+        if [ $PLAYER -eq $ARROW ] 
+        then
+           echo "You found an arrow!"
+           let "ARROW = 999"
+           let "ARROWS_REMAINING = ARROWS_REMAINING + 1"
+        fi
     else
         echo "Invalid move: $1"
     fi
@@ -140,12 +140,6 @@ do
     if is_adjacent $BATS
     then
         echo "You hear flapping."
-    fi
-    if is_adjacent $ARROW
-    then
-        echo "You found an arrow!"
-        let "ARROW = 999"
-        let "ARROWS_REMAINING = ARROWS_REMAINING + 1"
     fi
     echo "Enter a command:"
     read COMMAND
