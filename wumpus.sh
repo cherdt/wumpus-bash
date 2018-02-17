@@ -94,10 +94,10 @@ process_command () {
     if [[ $1 =~ ^[0-9]+ ]]
     then
         move $1
-    elif [[ $1 =~ ^[Mm] ]]
+    elif [[ $1 =~ "^[Mm] [0-9]+" ]]
     then
         move $2
-    elif [[ $1 =~ ^[Ss] ]]
+    elif [[ $1 =~ "^[Ss] [0-9]+" ]]
     then
         shoot $2
     elif [[ $1 =~ ^[EeQq] ]]
