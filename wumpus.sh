@@ -94,10 +94,10 @@ process_command () {
     if [[ $1 =~ ^[0-9]+ ]]
     then
         move $1
-    elif [[ $1 =~ "^[Mm] [0-9]+" ]]
+    elif [[ $1 =~ ^[Mm] && $# == 2 && $2 =~ ^[0-9]+$ ]]
     then
         move $2
-    elif [[ $1 =~ "^[Ss] [0-9]+" ]]
+    elif [[ $1 =~ ^[Ss] && $# == 2 && $2 =~ ^[0-9]+$ ]]
     then
         shoot $2
     elif [[ $1 =~ ^[EeQq] ]]
@@ -117,23 +117,27 @@ print_help () {
     echo "- q|quit"
 }
 
-echo "###################"
-echo "#                 #"
-echo "# HUNT THE WUMPUS #"
-echo "#                 #"
-echo "###################"
-echo
-echo "You are in a series of dark caverns."
-echo "Like, really dark."
-echo "You can barely see."
-echo "But they are ADA compliant."
-echo "They are numbered in Braille."
-echo "Which, somehow, you can read. Cool!"
-echo
-echo "You are here to hunt the terrifying wumpus."
-echo "You'll know when he's near. You'll smell him."
-echo "Look out for the bottomless pit. And the bats!"
-echo "You have 3 arrows."
+print_intro () {
+    echo "###################"
+    echo "#                 #"
+    echo "# HUNT THE WUMPUS #"
+    echo "#                 #"
+    echo "###################"
+    echo
+    echo "You are in a series of dark caverns."
+    echo "Like, really dark."
+    echo "You can barely see."
+    echo "But they are ADA compliant."
+    echo "They are numbered in Braille."
+    echo "Which, somehow, you can read. Cool!"
+    echo
+    echo "You are here to hunt the terrifying wumpus."
+    echo "You'll know when he's near. You'll smell him."
+    echo "Look out for the bottomless pit. And the bats!"
+    echo "You have 3 arrows."
+}
+
+print_intro
 
 while [ $GAMEOVER -eq 0 ]
 do
